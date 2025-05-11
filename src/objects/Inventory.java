@@ -1,13 +1,11 @@
 package objects;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Inventory {
     private String itemId;
     private String itemName;
-    private String category; // e.g., "Medical Supplies", "Equipment", "Medication"
+    private String category;
     private int quantity;
     private int minimumQuantity;
     private double unitPrice;

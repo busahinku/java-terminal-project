@@ -76,10 +76,6 @@ public abstract class BaseAppointment {
         }
     }
 
-    public void cancel() {
-        handleStatusChange("Cancelled");
-        System.out.println("Appointment cancelled");
-    }
 
     public String GeneralInfo() {
         return "Appointment Information [ID: " + appointmentId + 

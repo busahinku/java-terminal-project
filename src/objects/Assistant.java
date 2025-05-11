@@ -34,18 +34,6 @@ public class Assistant extends Person {
         return duty;
     }
 
-    public Department getDepartment() {
-        return department;
-    }
-
-    public double getSalary() {
-        return salary;
-    }
-
-    public String getWorkSchedule() {
-        return workSchedule;
-    }
-
     // Setters
     public void setSupervisor(Doctor supervisor) {
         this.supervisor = supervisor;
@@ -53,18 +41,6 @@ public class Assistant extends Person {
 
     public void setDuty(String duty) {
         this.duty = duty;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
-
-    public void setSalary(double salary) {
-        this.salary = salary;
-    }
-
-    public void setWorkSchedule(String workSchedule) {
-        this.workSchedule = workSchedule;
     }
 
     // String Methods These not return something so we cant use these from JavaFX application

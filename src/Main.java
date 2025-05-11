@@ -1,10 +1,7 @@
-
-
 import objects.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
@@ -14,6 +11,7 @@ public class Main {
     private static Person currentUser = null;
     private static List<Department> departments = new ArrayList<>();
     private static List<Inventory> inventoryList = new ArrayList<>();
+    private static List<Room> rooms = new ArrayList<>();
 
     public static void main(String[] args) {
         initializeData();
@@ -78,6 +76,14 @@ public class Main {
         inventoryList.add(new Inventory("I001", "Paracetamol", "Medication", 100, 10, 1.5, "PharmaSupplier", "Main Pharmacy"));
         inventoryList.add(new Inventory("I002", "Bandage", "Medical Supplies", 50, 5, 0.5, "MedSupplyCo", "Main Storage"));
         inventoryList.add(new Inventory("I003", "Ibuprofen", "Medication", 80, 10, 2.0, "PharmaSupplier", "Main Pharmacy"));
+
+        // Add some sample rooms
+        rooms.add(new Room("101", "Standard", 2, 50.0, "Bed, TV, Bathroom"));
+        rooms.add(new Room("102", "Standard", 2, 50.0, "Bed, TV, Bathroom"));
+        rooms.add(new Room("201", "ICU", 1, 200.0, "Ventilator, Monitor, Bed"));
+        rooms.add(new Room("202", "ICU", 1, 200.0, "Ventilator, Monitor, Bed"));
+        rooms.add(new Room("301", "Operating Room", 1, 500.0, "Surgical Table, Lights, Equipment"));
+        rooms.add(new Room("401", "Emergency Room", 4, 300.0, "Stretcher, Equipment, Supplies"));
     }
 
     private static void showWelcomeMenu() {
@@ -193,7 +199,12 @@ public class Main {
         if (currentUser instanceof Founder) {
             showFounderMenu();
         } else if (currentUser instanceof Doctor) {
-            showDoctorMenu();
+            Doctor doctor = (Doctor) currentUser;
+            if (doctor.isPrivateDoctor()) {
+                showPrivateDoctorMenu();
+            } else {
+                showDoctorMenu();
+            }
         } else if (currentUser instanceof Patient) {
             showPatientMenu();
         } else if (currentUser instanceof Pharmacist) {
@@ -215,7 +226,9 @@ public class Main {
             System.out.println("7. View All Workers");
             System.out.println("8. View All Departments");
             System.out.println("9. Generate Monthly Report");
-            System.out.println("10. Logout");
+            System.out.println("10. Create Room");
+            System.out.println("11. View All Rooms");
+            System.out.println("12. Logout");
             System.out.print("\nSelect an option: ");
 
             String choice = scanner.nextLine();
@@ -248,6 +261,12 @@ public class Main {
                     generateMonthlyReport();
                     break;
                 case "10":
+                    createRoom();
+                    break;
+                case "11":
+                    viewAllRooms();
+                    break;
+                case "12":
                     currentUser = null;
                     return;
                 default:
@@ -266,7 +285,10 @@ public class Main {
             System.out.println("5. Update Medical Records");
             System.out.println("6. View Schedule");
             System.out.println("7. Complete/Cancel Appointment");
-            System.out.println("8. Logout");
+            System.out.println("8. Update Patient Medical Record");
+            System.out.println("9. Assign Patient to Room");
+            System.out.println("10. View Available Rooms");
+            System.out.println("11. Logout");
             System.out.print("\nSelect an option: ");
 
             String choice = scanner.nextLine();
@@ -293,6 +315,15 @@ public class Main {
                     manageDoctorAppointments();
                     break;
                 case "8":
+                    updatePatientMedicalRecord();
+                    break;
+                case "9":
+                    assignPatientToRoom();
+                    break;
+                case "10":
+                    viewAvailableRooms();
+                    break;
+                case "11":
                     currentUser = null;
                     return;
                 default:
@@ -658,7 +689,9 @@ public class Main {
             for (Person user : users) {
                 if (user instanceof Doctor) {
                     Doctor doc = (Doctor) user;
-                    System.out.println(doc.getId() + ": " + doc.getFullName() + " (" + doc.getSpecialty() + ")");
+                    String type = doc.isPrivateDoctor() ? "Private Practice" : "Hospital";
+                    System.out.println(doc.getId() + ": " + doc.getFullName() + 
+                            " (" + doc.getSpecialty() + ") - " + type);
                 }
             }
 
@@ -728,6 +761,9 @@ public class Main {
                 System.out.println("Doctor: " + appointment.getDoctor().getFullName());
                 System.out.println("Date: " + appointment.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
                 System.out.println("Cost: $" + appointment.getCost());
+                if (selectedDoctor.isPrivateDoctor()) {
+                    System.out.println("Location: " + selectedDoctor.getOfficeNumber()); // For private doctors, this is their office address
+                }
             } else {
                 System.out.println("Failed to create appointment.");
             }
@@ -852,13 +888,31 @@ public class Main {
                 double height = Double.parseDouble(scanner.nextLine());
                 System.out.print("Weight (kg): ");
                 double weight = Double.parseDouble(scanner.nextLine());
+                System.out.print("Diagnosis: ");
+                String diagnosis = scanner.nextLine();
+                System.out.print("Procedures: ");
+                String procedures = scanner.nextLine();
+                System.out.print("Allergies: ");
+                String allergies = scanner.nextLine();
+                System.out.print("Immunizations: ");
+                String immunizations = scanner.nextLine();
+                System.out.print("Lab Results: ");
+                String labResults = scanner.nextLine();
+                System.out.print("Additional Notes:: ");
+                String notes = scanner.nextLine();
 
                 MedicalRecord record = new MedicalRecord(
                         "MR" + System.currentTimeMillis(),
                         selectedPatient,
                         bloodType,
                         height,
-                        weight
+                        weight,
+                        diagnosis,
+                        procedures,
+                        allergies,
+                        immunizations,
+                        labResults,
+                        notes
                 );
 
                 selectedPatient.setMedicalRecord(record);
@@ -1251,13 +1305,6 @@ public class Main {
         }
     }
 
-    private static void manageInventory() {
-        if (currentUser instanceof Pharmacist) {
-            System.out.println("\n=== Manage Inventory ===");
-            System.out.println("Inventory management functionality to be implemented.");
-        }
-    }
-
     private static void manageDoctorAppointments() {
         if (currentUser instanceof Doctor) {
             Doctor doctor = (Doctor) currentUser;
@@ -1335,38 +1382,71 @@ public class Main {
         String username = scanner.nextLine();
         System.out.print("Password: ");
         String password = scanner.nextLine();
-        System.out.print("Department: ");
-        String department = scanner.nextLine();
-        System.out.print("Specialty: ");
-        String specialty = scanner.nextLine();
-        System.out.print("Office Number: ");
-        String officeNumber = scanner.nextLine();
-        System.out.print("Max Patients Per Day: ");
-        short maxPatients = Short.parseShort(scanner.nextLine());
         System.out.print("Is Private Doctor? (yes/no): ");
         boolean isPrivate = scanner.nextLine().toLowerCase().startsWith("y");
-        System.out.print("Salary: ");
-        double salary = Double.parseDouble(scanner.nextLine());
 
-        Doctor newDoctor = new Doctor(
-                doctorId,
-                firstName,
-                lastName,
-                age,
-                gender,
-                phoneNumber,
-                username,
-                password,
-                department,
-                specialty,
-                officeNumber,
-                maxPatients,
-                isPrivate,
-                salary
-        );
-        newDoctor.setStaticSchedule(new StaticSchedule());
-        users.add(newDoctor);
-        System.out.println("Doctor created successfully!");
+        if (isPrivate) {
+            System.out.print("Specialty: ");
+            String specialty = scanner.nextLine();
+            System.out.print("Office Address: ");
+            String officeAddress = scanner.nextLine();
+            System.out.print("Consultation Fee ($): ");
+            double consultationFee = Double.parseDouble(scanner.nextLine());
+            System.out.print("Max Patients Per Day: ");
+            short maxPatients = Short.parseShort(scanner.nextLine());
+
+            Doctor newDoctor = new Doctor(
+                    doctorId,
+                    firstName,
+                    lastName,
+                    age,
+                    gender,
+                    phoneNumber,
+                    username,
+                    password,
+                    "Private Practice",
+                    specialty,
+                    officeAddress,
+                    maxPatients,
+                    true,
+                    0.0  // Private doctors don't have a salary
+            );
+            newDoctor.setConsultationFee(consultationFee);
+            newDoctor.setStaticSchedule(new StaticSchedule());
+            users.add(newDoctor);
+            System.out.println("Private doctor created successfully!");
+        } else {
+            System.out.print("Department: ");
+            String department = scanner.nextLine();
+            System.out.print("Specialty: ");
+            String specialty = scanner.nextLine();
+            System.out.print("Office Number: ");
+            String officeNumber = scanner.nextLine();
+            System.out.print("Max Patients Per Day: ");
+            short maxPatients = Short.parseShort(scanner.nextLine());
+            System.out.print("Salary: ");
+            double salary = Double.parseDouble(scanner.nextLine());
+
+            Doctor newDoctor = new Doctor(
+                    doctorId,
+                    firstName,
+                    lastName,
+                    age,
+                    gender,
+                    phoneNumber,
+                    username,
+                    password,
+                    department,
+                    specialty,
+                    officeNumber,
+                    maxPatients,
+                    false,
+                    salary
+            );
+            newDoctor.setStaticSchedule(new StaticSchedule());
+            users.add(newDoctor);
+            System.out.println("Hospital doctor created successfully!");
+        }
     }
 
     private static void createAssistant() {
@@ -1444,5 +1524,383 @@ public class Main {
         );
         users.add(newAssistant);
         System.out.println("Assistant created successfully!");
+    }
+
+    private static void updatePatientMedicalRecord() {
+        if (currentUser instanceof Doctor) {
+            System.out.println("\n=== Update Patient Medical Record ===");
+            
+            // Show available patients
+            System.out.println("\nYour Patients:");
+            Doctor doctor = (Doctor) currentUser;
+            List<Patient> patients = doctor.getPatients();
+            if (patients.isEmpty()) {
+                System.out.println("No patients found.");
+                return;
+            }
+            
+            for (Patient patient : patients) {
+                System.out.println(patient.getId() + ": " + patient.getFullName());
+            }
+            
+            System.out.print("\nSelect Patient ID: ");
+            String patientId = scanner.nextLine();
+            
+            Patient selectedPatient = null;
+            for (Patient patient : patients) {
+                if (patient.getId().equals(patientId)) {
+                    selectedPatient = patient;
+                    break;
+                }
+            }
+            
+            if (selectedPatient == null) {
+                System.out.println("Invalid patient selection.");
+                return;
+            }
+            
+            MedicalRecord record = selectedPatient.getMedicalRecord();
+            if (record == null) {
+                System.out.println("No medical record found for this patient.");
+                return;
+            }
+            
+            while (true) {
+                System.out.println("\nWhat would you like to update?");
+                System.out.println("1. Height");
+                System.out.println("2. Weight");
+                System.out.println("3. Blood Type");
+                System.out.println("4. Diagnoses");
+                System.out.println("5. Procedures");
+                System.out.println("6. Allergies");
+                System.out.println("7. Immunizations");
+                System.out.println("8. Lab Results");
+                System.out.println("9. Add Medication");
+                System.out.println("10. Remove Medication");
+                System.out.println("11. Notes");
+                System.out.println("12. Back");
+                System.out.print("\nSelect an option: ");
+                
+                String choice = scanner.nextLine();
+                try {
+                    switch (choice) {
+                        case "1":
+                            System.out.print("Enter new height (cm): ");
+                            double height = Double.parseDouble(scanner.nextLine());
+                            record.setHeight(height);
+                            System.out.println("Height updated successfully.");
+                            break;
+                            
+                        case "2":
+                            System.out.print("Enter new weight (kg): ");
+                            double weight = Double.parseDouble(scanner.nextLine());
+                            record.setWeight(weight);
+                            System.out.println("Weight updated successfully.");
+                            break;
+                            
+                        case "3":
+                            System.out.print("Enter new blood type: ");
+                            String bloodType = scanner.nextLine();
+                            record.setBloodType(bloodType);
+                            System.out.println("Blood type updated successfully.");
+                            break;
+                            
+                        case "4":
+                            System.out.print("Enter new diagnoses: ");
+                            String diagnoses = scanner.nextLine();
+                            record.setDiagnoses(diagnoses);
+                            System.out.println("Diagnoses updated successfully.");
+                            break;
+                            
+                        case "5":
+                            System.out.print("Enter new procedures: ");
+                            String procedures = scanner.nextLine();
+                            record.setProcedures(procedures);
+                            System.out.println("Procedures updated successfully.");
+                            break;
+                            
+                        case "6":
+                            System.out.print("Enter new allergies: ");
+                            String allergies = scanner.nextLine();
+                            record.setAllergies(allergies);
+                            System.out.println("Allergies updated successfully.");
+                            break;
+                            
+                        case "7":
+                            System.out.print("Enter new immunizations: ");
+                            String immunizations = scanner.nextLine();
+                            record.setImmunizations(immunizations);
+                            System.out.println("Immunizations updated successfully.");
+                            break;
+                            
+                        case "8":
+                            System.out.print("Enter new lab results: ");
+                            String labResults = scanner.nextLine();
+                            record.setLabResults(labResults);
+                            System.out.println("Lab results updated successfully.");
+                            break;
+                            
+                        case "9":
+                            System.out.print("Enter medication to add: ");
+                            String medication = scanner.nextLine();
+                            record.addMedication(medication);
+                            System.out.println("Medication added successfully.");
+                            break;
+                            
+                        case "10":
+                            System.out.print("Enter medication to remove: ");
+                            String medToRemove = scanner.nextLine();
+                            record.removeMedication(medToRemove);
+                            System.out.println("Medication removed successfully.");
+                            break;
+                            
+                        case "11":
+                            System.out.print("Enter new notes: ");
+                            String notes = scanner.nextLine();
+                            record.setNotes(notes);
+                            System.out.println("Notes updated successfully.");
+                            break;
+                            
+                        case "12":
+                            return;
+                            
+                        default:
+                            System.out.println("Invalid option. Please try again.");
+                    }
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private static void createRoom() {
+        if (currentUser instanceof Founder) {
+            System.out.println("\n=== Create Room ===");
+            
+            System.out.print("Room Name: ");
+            String roomName = scanner.nextLine();
+            
+            System.out.println("\nRoom Types:");
+            System.out.println("1. Standard");
+            System.out.println("2. ICU");
+            System.out.println("3. Operating Room");
+            System.out.println("4. Emergency Room");
+            System.out.print("Select Room Type (1-4): ");
+            String typeChoice = scanner.nextLine();
+            
+            String roomType;
+            switch (typeChoice) {
+                case "1": roomType = "Standard"; break;
+                case "2": roomType = "ICU"; break;
+                case "3": roomType = "Operating Room"; break;
+                case "4": roomType = "Emergency Room"; break;
+                default:
+                    System.out.println("Invalid room type selection.");
+                    return;
+            }
+            
+            System.out.print("Capacity: ");
+            int capacity = Integer.parseInt(scanner.nextLine());
+            
+            System.out.print("Hourly Rate ($): ");
+            double hourlyRate = Double.parseDouble(scanner.nextLine());
+            
+            System.out.print("Equipment (comma-separated): ");
+            String equipment = scanner.nextLine();
+            
+            Room newRoom = new Room(roomName, roomType, capacity, hourlyRate, equipment);
+            rooms.add(newRoom);
+            System.out.println("Room created successfully!");
+        }
+    }
+
+    private static void viewAllRooms() {
+        if (currentUser instanceof Founder) {
+            System.out.println("\n=== All Rooms ===");
+            if (rooms.isEmpty()) {
+                System.out.println("No rooms found.");
+                return;
+            }
+            
+            for (Room room : rooms) {
+                System.out.println(room.GeneralInfo());
+            }
+        }
+    }
+
+    private static void viewAvailableRooms() {
+        if (currentUser instanceof Doctor) {
+            System.out.println("\n=== Available Rooms ===");
+            boolean hasAvailableRooms = false;
+            
+            for (Room room : rooms) {
+                if (room.isAvailable()) {
+                    System.out.println(room.GeneralInfo());
+                    hasAvailableRooms = true;
+                }
+            }
+            
+            if (!hasAvailableRooms) {
+                System.out.println("No available rooms found.");
+            }
+        }
+    }
+
+    private static void assignPatientToRoom() {
+        if (currentUser instanceof Doctor) {
+            System.out.println("\n=== Assign Patient to Room ===");
+            
+            // Show doctor's patients
+            Doctor doctor = (Doctor) currentUser;
+            List<Patient> patients = doctor.getPatients();
+            if (patients.isEmpty()) {
+                System.out.println("No patients found.");
+                return;
+            }
+            
+            System.out.println("\nYour Patients:");
+            for (Patient patient : patients) {
+                System.out.println(patient.getId() + ": " + patient.getFullName());
+            }
+            
+            System.out.print("\nSelect Patient ID: ");
+            String patientId = scanner.nextLine();
+            
+            Patient selectedPatient = null;
+            for (Patient patient : patients) {
+                if (patient.getId().equals(patientId)) {
+                    selectedPatient = patient;
+                    break;
+                }
+            }
+            
+            if (selectedPatient == null) {
+                System.out.println("Invalid patient selection.");
+                return;
+            }
+            
+            // Show available rooms
+            System.out.println("\nAvailable Rooms:");
+            boolean hasAvailableRooms = false;
+            for (Room room : rooms) {
+                if (room.isAvailable()) {
+                    System.out.println(room.GeneralInfo());
+                    hasAvailableRooms = true;
+                }
+            }
+            
+            if (!hasAvailableRooms) {
+                System.out.println("No available rooms found.");
+                return;
+            }
+            
+            System.out.print("\nEnter Room Name: ");
+            String roomName = scanner.nextLine();
+            
+            Room selectedRoom = null;
+            for (Room room : rooms) {
+                if (room.getRoomName().equals(roomName) && room.isAvailable()) {
+                    selectedRoom = room;
+                    break;
+                }
+            }
+            
+            if (selectedRoom == null) {
+                System.out.println("Invalid room selection or room is not available.");
+                return;
+            }
+            
+            selectedRoom.assignPatient(selectedPatient);
+            selectedPatient.setCurrentRoom(selectedRoom);
+            System.out.println("Patient assigned to room successfully!");
+        }
+    }
+
+    private static void showPrivateDoctorMenu() {
+        while (true) {
+            System.out.println("\n=== Private Doctor Dashboard ===");
+            System.out.println("1. View Profile");
+            System.out.println("2. View Appointments");
+            System.out.println("3. View Patients");
+            System.out.println("4. Write Prescription");
+            System.out.println("5. Update Medical Records");
+            System.out.println("6. View Schedule");
+            System.out.println("7. Complete/Cancel Appointment");
+            System.out.println("8. Update Patient Medical Record");
+            System.out.println("9. Set Consultation Fee");
+            System.out.println("10. View Earnings");
+            System.out.println("11. Logout");
+            System.out.print("\nSelect an option: ");
+
+            String choice = scanner.nextLine();
+            switch (choice) {
+                case "1":
+                    showProfile();
+                    break;
+                case "2":
+                    viewAppointments();
+                    break;
+                case "3":
+                    viewPatients();
+                    break;
+                case "4":
+                    writePrescription();
+                    break;
+                case "5":
+                    updateMedicalRecords();
+                    break;
+                case "6":
+                    viewSchedule();
+                    break;
+                case "7":
+                    manageDoctorAppointments();
+                    break;
+                case "8":
+                    updatePatientMedicalRecord();
+                    break;
+                case "9":
+                    setConsultationFee();
+                    break;
+                case "10":
+                    viewEarnings();
+                    break;
+                case "11":
+                    currentUser = null;
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+
+    private static void setConsultationFee() {
+        if (currentUser instanceof Doctor && ((Doctor) currentUser).isPrivateDoctor()) {
+            System.out.println("\n=== Set Consultation Fee ===");
+            System.out.print("Enter new consultation fee ($): ");
+            double fee = Double.parseDouble(scanner.nextLine());
+            ((Doctor) currentUser).setConsultationFee(fee);
+            System.out.println("Consultation fee updated successfully!");
+        }
+    }
+
+    private static void viewEarnings() {
+        if (currentUser instanceof Doctor && ((Doctor) currentUser).isPrivateDoctor()) {
+            Doctor doctor = (Doctor) currentUser;
+            System.out.println("\n=== Earnings Report ===");
+            double totalEarnings = 0.0;
+            int totalAppointments = 0;
+            
+            for (Appointment apt : doctor.getAppointments()) {
+                if (apt.getStatus().equals("Completed")) {
+                    totalEarnings += apt.getCost();
+                    totalAppointments++;
+                }
+            }
+            
+            System.out.println("Total Completed Appointments: " + totalAppointments);
+            System.out.println("Total Earnings: $" + totalEarnings);
+            System.out.println("Average per Appointment: $" + (totalAppointments > 0 ? totalEarnings / totalAppointments : 0));
+        }
     }
 }

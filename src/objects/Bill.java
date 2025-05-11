@@ -1,8 +1,6 @@
 package objects;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class Bill {
@@ -13,7 +11,6 @@ public class Bill {
     private double totalAmount;
     private double paidAmount;
     private boolean isPaid;
-    private List<BillItem> items;
     private String notes;
 
     public Bill(String billId, Patient patient, LocalDateTime dueDate) {
@@ -24,7 +21,6 @@ public class Bill {
         this.totalAmount = 0.0;
         this.paidAmount = 0.0;
         this.isPaid = false;
-        this.items = new ArrayList<>();
         this.notes = "";
     }
 
@@ -57,9 +53,6 @@ public class Bill {
         return isPaid;
     }
 
-    public List<BillItem> getItems() {
-        return new ArrayList<>(items);
-    }
 
 
     public String getNotes() {
@@ -67,13 +60,6 @@ public class Bill {
     }
 
     // Methods
-    public void addItem(String description, double amount) {
-        BillItem item = new BillItem(description, amount);
-        items.add(item);
-        totalAmount += amount;
-    }
-    
-
     public void makePayment(double amount) {
         if (!isPaid) {
             this.paidAmount += amount;

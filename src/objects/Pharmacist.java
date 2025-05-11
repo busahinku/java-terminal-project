@@ -43,10 +43,6 @@ public class Pharmacist extends Person {
     }
 
     // Methods
-    public void checkStock(String medication) {
-        boolean inStock = medications.contains(medication);
-        System.out.println("Medication " + medication + " is " + "in stock");
-    }
 
     public void distributeMedication(Prescription prescription) {
         if (medications.contains(prescription.getMedication())) {

@@ -1,6 +1,5 @@
 package objects;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,24 +18,24 @@ public class Doctor extends Person {
     private List<Patient> patients;
     private StaticSchedule staticSchedule;
     private List<Review> reviews;
+    private short maxPatientsPerDay;
+    private double consultationFee;
 
-    public Doctor(String id, String firstName, String lastName, int age, char gender, 
-                 String phoneNumber, String username, String password,
-                 String department, String specialty, String officeNumber, 
-                 short experience, boolean isPrivate, double salary) {
+    public Doctor(String id, String firstName, String lastName, int age, char gender, String phoneNumber,
+                 String username, String password, String department, String specialty, String officeNumber,
+                 short maxPatientsPerDay, boolean isPrivate, double salary) {
         super(id, firstName, lastName, age, gender, phoneNumber, username, password);
         this.department = department;
         this.specialty = specialty;
         this.officeNumber = officeNumber;
-        this.experience = experience;
+        this.maxPatientsPerDay = maxPatientsPerDay;
         this.isPrivate = isPrivate;
         this.salary = salary;
-        this.appointmentFee = 0.0;
-        this.privatePracticeLocation = null;
+        this.consultationFee = isPrivate ? 100.0 : 0.0; // Default consultation fee for private doctors
         this.appointments = new ArrayList<>();
         this.patients = new ArrayList<>();
         this.reviews = new ArrayList<>();
-        this.staticSchedule = null;
+        this.staticSchedule = new StaticSchedule();
     }
 
     // Getters
@@ -88,6 +87,14 @@ public class Doctor extends Person {
         return new ArrayList<>(reviews);
     }
 
+    public boolean isPrivateDoctor() {
+        return isPrivate;
+    }
+
+    public double getConsultationFee() {
+        return consultationFee;
+    }
+
     // Setters
     public void setDepartment(String department) {
         this.department = department;
@@ -113,13 +120,13 @@ public class Doctor extends Person {
         this.staticSchedule = schedule;
     }
 
-    // Methods
-    public void cancelAppointment(Appointment appointment) {
-            appointments.remove(appointment);
-            // Update the status of the appointment
-            appointment.setStatus("Cancelled");
+    public void setConsultationFee(double fee) {
+        if (isPrivate) {
+            this.consultationFee = fee;
+        }
     }
 
+    // Methods
     public void addReview(Review review) {
         if (!reviews.contains(review)) {
             reviews.add(review);
@@ -179,25 +186,14 @@ public class Doctor extends Person {
         return true;
     }
 
-
     public Appointment scheduleAppointment(Patient patient, StaticSchedule.Day day, LocalTime time) {
-        // Availability of the time.
-        if (!isAvailable(day, time)) {
-            System.out.println("Sorry, the selected time slot is not available.");
-            System.out.println("Available time slots:");
-            System.out.println(staticSchedule.getAvailableTimeSlotsAsString(day, appointments));
+        if (appointments.size() >= maxPatientsPerDay) {
+            System.out.println("Maximum number of appointments reached for today.");
             return null;
         }
 
-        id = id + 1;
-        String textAppointmentIDC = String.valueOf(id);
-        String appointmentId = "APP" + textAppointmentIDC;
-        
-        // Convert day and time to LocalDateTime for the appointment
-        LocalDateTime dateTime = LocalDateTime.of(2025, 5, 26, 9, 0);
-        Appointment appointment = new Appointment(appointmentId, patient, this, dateTime);
+        Appointment appointment = new Appointment(patient, this, day, time);
         appointments.add(appointment);
-        
         patient.addAppointment(appointment);
         if (!patients.contains(patient)) {
             patients.add(patient);

@@ -38,18 +38,6 @@ public class Room {
         return isAvailable;
     }
 
-    public Patient getCurrentPatient() {
-        return currentPatient;
-    }
-
-    public double getHourlyRate() {
-        return hourlyRate;
-    }
-
-    public String getEquipment() {
-        return equipment;
-    }
-
     // Methods
     public void assignPatient(Patient patient) {
         if (this.currentPatient == null) {

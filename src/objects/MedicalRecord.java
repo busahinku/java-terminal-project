@@ -7,48 +7,34 @@ import java.util.List;
 public class MedicalRecord {
     private String recordId;
     private Patient patient;
-    private List<String> diagnoses;
-    private List<String> procedures;
+    private String diagnoses;
+    private String procedures;
     private List<String> medications;
-    private List<String> allergies;
-    private List<String> immunizations;
-    private List<String> labResults;
+    private String allergies;
+    private String immunizations;
+    private String labResults;
     private LocalDateTime lastUpdated;
     private String bloodType;
     private double height;
     private double weight;
     private String notes;
 
-    public MedicalRecord(String recordId, Patient patient, String bloodType, double height, double weight) {
+    public MedicalRecord(String recordId, Patient patient, String bloodType,
+                         double height, double weight, String diagnoses, String procedures,
+                         String allergies, String immunizations, String labResults, String notes) {
         this.recordId = recordId;
         this.patient = patient;
         this.bloodType = bloodType;
         this.height = height;
         this.weight = weight;
-        this.diagnoses = new ArrayList<>();
-        this.procedures = new ArrayList<>();
+        this.diagnoses = diagnoses;
+        this.procedures = procedures;
         this.medications = new ArrayList<>();
-        this.allergies = new ArrayList<>();
-        this.immunizations = new ArrayList<>();
-        this.labResults = new ArrayList<>();
+        this.allergies = allergies;
+        this.immunizations = immunizations;
+        this.labResults = labResults;
         this.lastUpdated = LocalDateTime.now();
-        this.notes = "";
-    }
-
-    public MedicalRecord(Patient patient) {
-        this.recordId = null;
-        this.patient = patient;
-        this.bloodType = null;
-        this.height = 000;
-        this.weight = 000;
-        this.diagnoses = new ArrayList<>();
-        this.procedures = new ArrayList<>();
-        this.medications = new ArrayList<>();
-        this.allergies = new ArrayList<>();
-        this.immunizations = new ArrayList<>();
-        this.labResults = new ArrayList<>();
-        this.lastUpdated = LocalDateTime.now();
-        this.notes = "";
+        this.notes = notes;
     }
 
     // Getters
@@ -60,28 +46,28 @@ public class MedicalRecord {
         return patient;
     }
 
-    public List<String> getDiagnoses() {
-        return new ArrayList<>(diagnoses);
+    public String getDiagnoses() {
+        return diagnoses;
     }
 
-    public List<String> getProcedures() {
-        return new ArrayList<>(procedures);
+    public String getProcedures() {
+        return procedures;
     }
 
     public List<String> getMedications() {
         return new ArrayList<>(medications);
     }
 
-    public List<String> getAllergies() {
-        return new ArrayList<>(allergies);
+    public String getAllergies() {
+        return allergies;
     }
 
-    public List<String> getImmunizations() {
-        return new ArrayList<>(immunizations);
+    public String getImmunizations() {
+        return immunizations;
     }
 
-    public List<String> getLabResults() {
-        return new ArrayList<>(labResults);
+    public String getLabResults() {
+        return labResults;
     }
 
     public LocalDateTime getLastUpdated() {
@@ -104,44 +90,86 @@ public class MedicalRecord {
         return notes;
     }
 
-    // Methods
-    public void addDiagnosis(String diagnosis) {
-        diagnoses.add(diagnosis);
-        updateLastModified();
+    // Setters
+    public void setRecordId(String recordId) {
+        this.recordId = recordId;
+        this.lastUpdated = LocalDateTime.now();
     }
 
-    public void addProcedure(String procedure) {
-        procedures.add(procedure);
-        updateLastModified();
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+        this.lastUpdated = LocalDateTime.now();
     }
 
+    public void setDiagnoses(String diagnoses) {
+        this.diagnoses = diagnoses;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setProcedures(String procedures) {
+        this.procedures = procedures;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setMedications(List<String> medications) {
+        this.medications = new ArrayList<>(medications);
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setAllergies(String allergies) {
+        this.allergies = allergies;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setImmunizations(String immunizations) {
+        this.immunizations = immunizations;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setLabResults(String labResults) {
+        this.labResults = labResults;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setBloodType(String bloodType) {
+        this.bloodType = bloodType;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setHeight(double height) {
+        if (height <= 0) {
+            throw new IllegalArgumentException("Height must be greater than 0");
+        }
+        this.height = height;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setWeight(double weight) {
+        if (weight <= 0) {
+            throw new IllegalArgumentException("Weight must be greater than 0");
+        }
+        this.weight = weight;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    // Convenience methods for medications
     public void addMedication(String medication) {
-        medications.add(medication);
-        updateLastModified();
+        this.medications.add(medication);
+        this.lastUpdated = LocalDateTime.now();
     }
 
-    public void addAllergy(String allergy) {
-        allergies.add(allergy);
-        updateLastModified();
+    public void removeMedication(String medication) {
+        this.medications.remove(medication);
+        this.lastUpdated = LocalDateTime.now();
     }
 
-    public void addImmunization(String immunization) {
-        immunizations.add(immunization);
-        updateLastModified();
-    }
-
-    public void addLabResult(String labResult) {
-        labResults.add(labResult);
-        updateLastModified();
-    }
-
-
-    public void addNote(String note) {
-        this.notes += "\n" + LocalDateTime.now() + ": " + note;
-        updateLastModified();
-    }
-
-    private void updateLastModified() {
+    public void clearMedications() {
+        this.medications.clear();
         this.lastUpdated = LocalDateTime.now();
     }
 
@@ -149,7 +177,7 @@ public class MedicalRecord {
         return "Medical Record ID: " + recordId +
                 ", Patient: " + patient.getFullName() +
                 ", Last Updated: " + lastUpdated +
-                ", Diagnoses: " + diagnoses.size() +
-                ", Procedures: " + procedures.size();
+                ", Diagnoses: " + diagnoses +
+                ", Procedures: " + procedures;
     }
 } 

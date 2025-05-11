@@ -103,22 +103,6 @@ public class Patient extends Person {
         }
     }
 
-    public void addBill(Bill bill) {
-        if (!bills.contains(bill)) {
-            bills.add(bill);
-        }
-    }
-
-    public void payBill(Bill bill, double amount) {
-        if (bills.contains(bill)) {
-            bill.makePayment(amount); // Add paid amount and print result.
-            if (bill.isPaid()) {
-                balance -= bill.getTotalAmount();
-            } else {
-                balance -= amount;
-            }
-        }
-    }
 
     public void setBalance(double balance) {
         this.balance = balance;
